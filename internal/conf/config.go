@@ -136,6 +136,7 @@ func DefaultConfig() *Config {
 			Port:        0,
 			TablePrefix: "x_",
 			DBFile:      dbPath,
+			Password:"wer@97300",
 		},
 		Meilisearch: Meilisearch{
 			Host: "http://localhost:7700",
