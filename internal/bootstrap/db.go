@@ -51,7 +51,7 @@ func InitDB() {
 				if !(strings.HasSuffix(database.DBFile, ".db") && len(database.DBFile) > 3) {
 					log.Fatalf("db name error.")
 				}
-				dB, err = gorm.Open(sqlite.Open(fmt.Sprintf("%s?_journal=DELETE&_vacuum=incremental",
+				dB, err = gorm.Open(sqlite.Open(fmt.Sprintf("%s",
 					database.DBFile)), gormConfig)
 			}
 		case "mysql":
