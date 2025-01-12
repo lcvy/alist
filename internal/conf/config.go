@@ -12,7 +12,7 @@ type Database struct {
 	Host        string `json:"host" env:"HOST"`
 	Port        int    `json:"port" env:"PORT"`
 	User        string `json:"user" env:"USER"`
-	Password    string `json:"password" env:"PASS"`
+	Password    string `json:"password"`
 	Name        string `json:"name" env:"NAME"`
 	DBFile      string `json:"db_file" env:"FILE"`
 	TablePrefix string `json:"table_prefix" env:"TABLE_PREFIX"`
