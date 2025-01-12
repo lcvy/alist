@@ -46,33 +46,14 @@ func InitDB() {
 	} else {
 		database := conf.Conf.Database
 		switch database.Type {
-		//case "sqlite3":
-			//{
-				//if !(strings.HasSuffix(database.DBFile, ".db") && len(database.DBFile) > 3) {
-					//log.Fatalf("db name error.")
-				//}
-				//dB, err = gorm.Open(sqlite.Open(fmt.Sprintf("%s",
-					//database.DBFile)), gormConfig)
-			//}
-			case "sqlite3":
-    {
-        if !(strings.HasSuffix(database.DBFile, ".db") && len(database.DBFile) > 3) {
-            log.Fatalf("db name error.")
-        }
-
-        // 打开 SQLite 数据库，不使用 WAL 模式，改用回滚日志（DELETE 模式）
-        dB, err = gorm.Open(sqlite.Open(fmt.Sprintf("%s", database.DBFile)), gormConfig)
-        
-        // 确保在打开数据库时切换到 DELETE 模式
-        sqlDB, err := dB.DB()
-        if err != nil {
-            log.Fatalf("failed to get raw DB instance: %s", err.Error())
-        }
-        _, err = sqlDB.Exec("PRAGMA journal_mode = DELETE;")
-        if err != nil {
-            log.Fatalf("failed to set journal_mode to DELETE: %s", err.Error())
-        }
-    }
+		case "sqlite3":
+			{
+				if !(strings.HasSuffix(database.DBFile, ".db") && len(database.DBFile) > 3) {
+					log.Fatalf("db name error.")
+				}
+				dB, err = gorm.Open(sqlite.Open(fmt.Sprintf("%s?_journal=DELETE&_vacuum=incremental",
+					database.DBFile)), gormConfig)
+			}
 
 		case "mysql":
 			{
