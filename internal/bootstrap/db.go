@@ -79,7 +79,6 @@ func InitDB() {
             } else {
                 log.Fatalf("Failed to open database: %v", err)
             }
-        }
 		
 		case "sqlite3_test":
 			{
