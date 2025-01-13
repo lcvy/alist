@@ -17,7 +17,7 @@ import (
 	"gorm.io/gorm/logger"
 	"gorm.io/gorm/schema"
 )
-import _ "github.com/mutecomm/go-sqlcipher/v2"
+import _ "github.com/mutecomm/go-sqlcipher"
 func InitDB() {
 	logLevel := logger.Silent
 	if flags.Debug || flags.Dev {
