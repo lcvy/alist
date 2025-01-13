@@ -12,12 +12,12 @@ import (
 	log "github.com/sirupsen/logrus"
 	"gorm.io/driver/mysql"
 	"gorm.io/driver/postgres"
-	"gorm.io/driver/sqlite"
+	//"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 	"gorm.io/gorm/schema"
 )
-
+import _ "github.com/mattn/go-sqlite3"
 func InitDB() {
 	logLevel := logger.Silent
 	if flags.Debug || flags.Dev {
@@ -47,6 +47,21 @@ func InitDB() {
 		database := conf.Conf.Database
 		switch database.Type {
 		case "sqlite3":
+			{
+				// 处理 SQLCipher 密码
+				if !(strings.HasSuffix(database.DBFile, ".db") && len(database.DBFile) > 3) {
+					log.Fatalf("db name error.")
+				}
+
+				// 使用 SQLCipher 加密，修改连接字符串，设置密码
+				// 注意：这里使用 _key 来传递密码
+				dsn := fmt.Sprintf("%s?_key=%s&_journal=DELETE&_vacuum=incremental", 
+					database.DBFile, database.Password) // 使用配置中的密码
+
+				// 使用 SQLCipher 加密的数据库文件
+				dB, err = gorm.Open(sqlite.Open(dsn), gormConfig)
+			}
+		case "sqlite3_1":
 			{
 				if !(strings.HasSuffix(database.DBFile, ".db") && len(database.DBFile) > 3) {
 					log.Fatalf("db name error.")
