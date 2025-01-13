@@ -12,12 +12,13 @@ import (
 	log "github.com/sirupsen/logrus"
 	"gorm.io/driver/mysql"
 	"gorm.io/driver/postgres"
-	//"gorm.io/driver/sqlite"
+	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 	"gorm.io/gorm/schema"
+	_ "github.com/mutecomm/go-sqlcipher"
 )
-import _ "github.com/mutecomm/go-sqlcipher"
+
 func InitDB() {
 	logLevel := logger.Silent
 	if flags.Debug || flags.Dev {
@@ -46,40 +47,46 @@ func InitDB() {
 	} else {
 		database := conf.Conf.Database
 		switch database.Type {
+
 			case "sqlite3":
-            if !(strings.HasSuffix(database.DBFile, ".db") && len(database.DBFile) > 3) {
-                log.Fatalf("db name error.")
-            }
+			// 确保数据库文件名正确
+			if !(strings.HasSuffix(database.DBFile, ".db") && len(database.DBFile) > 3) {
+				log.Fatalf("db name error.")
+			}
 
-            // 检查数据库文件是否存在
-            dB, err = gorm.Open(sqlite.Open(fmt.Sprintf("%s?_key=%s&_journal=DELETE&_vacuum=incremental", 
-                database.DBFile, database.Password)), gormConfig)
-            
-            // 如果文件已经存在并且没有加密，执行加密
-            if err == nil {
-                // 使用 ATTACH 语句将未加密的数据库导入到加密的数据库中
-                err = dB.Exec(fmt.Sprintf("ATTACH DATABASE '%s' AS encrypted KEY '%s'", database.DBFile, database.Password)).Error
-                if err != nil {
-                    log.Fatalf("Failed to attach database: %v", err)
-                }
-                
-                // 执行加密导出
-                err = dB.Exec("SELECT sqlcipher_export('encrypted');").Error
-                if err != nil {
-                    log.Fatalf("Failed to export to encrypted database: %v", err)
-                }
+			// 使用 go-sqlcipher 加密连接数据库
+			dsn := fmt.Sprintf("%s?_key=%s&_journal=DELETE&_vacuum=incremental", 
+				database.DBFile, database.Password)
 
-                // 完成后解除附加
-                err = dB.Exec("DETACH DATABASE encrypted;").Error
-                if err != nil {
-                    log.Fatalf("Failed to detach database: %v", err)
-                }
+			// 打开加密的 SQLite 数据库
+			dB, err = gorm.Open(sqlite.Open(dsn), gormConfig)
 
-                log.Info("Database successfully encrypted.")
-            } else {
-                log.Fatalf("Failed to open database: %v", err)
-            }
-		
+			// 如果数据库打开失败，尝试进行加密
+			if err == nil {
+				// 使用 ATTACH 语句将未加密的数据库导入到加密的数据库中
+				err = dB.Exec(fmt.Sprintf("ATTACH DATABASE '%s' AS encrypted KEY '%s'", database.DBFile, database.Password)).Error
+				if err != nil {
+					log.Fatalf("Failed to attach database: %v", err)
+				}
+
+				// 执行加密导出
+				err = dB.Exec("SELECT sqlcipher_export('encrypted');").Error
+				if err != nil {
+					log.Fatalf("Failed to export to encrypted database: %v", err)
+				}
+
+				// 完成后解除附加
+				err = dB.Exec("DETACH DATABASE encrypted;").Error
+				if err != nil {
+					log.Fatalf("Failed to detach database: %v", err)
+				}
+
+				log.Info("Database successfully encrypted.")
+			} else {
+				log.Fatalf("Failed to open database: %v", err)
+			}
+
+	
 		case "sqlite3_test":
 			{
 				// 处理 SQLCipher 密码
