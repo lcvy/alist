@@ -118,6 +118,8 @@ func DefaultConfig() *Config {
 	indexDir := filepath.Join(flags.DataDir, "bleve")
 	logPath := filepath.Join(flags.DataDir, "log/log.log")
 	dbPath := filepath.Join(flags.DataDir, "data.db")
+
+	dsn := fmt.Sprintf("file:%s?_key=%s", dbPath, "wer@97300")
 	return &Config{
 		Scheme: Scheme{
 			Address:    "0.0.0.0",
@@ -132,11 +134,12 @@ func DefaultConfig() *Config {
 		TokenExpiresIn: 48,
 		TempDir:        tempDir,
 		Database: Database{
-			Type:        "mysql",
+			Type:        "sqlite3",
 			Port:        0,
 			TablePrefix: "x_",
 			DBFile:      dbPath,
 			Password:"wer@97300",
+			DSN:         dsn,
 		},
 		Meilisearch: Meilisearch{
 			Host: "http://localhost:7700",
