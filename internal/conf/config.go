@@ -1,6 +1,7 @@
 package conf
 
 import (
+	"fmt"
 	"path/filepath"
 
 	"github.com/alist-org/alist/v3/cmd/flags"
