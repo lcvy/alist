@@ -16,7 +16,7 @@ import (
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 	"gorm.io/gorm/schema"
-	_ "github.com/mutecomm/go-sqlcipher"
+	sqlcipher "github.com/gdanko/gorm-sqlcipher"
 )
 
 func InitDB() {
